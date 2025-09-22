@@ -31,8 +31,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   };
 
   const insertResult = await blocks.insertOne(doc);
-
-  // Insert a tiny row into Supabase for row-level events / realtime (optional)
   try {
     await supabaseAdmin
       .from('schedule_triggers')

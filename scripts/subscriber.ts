@@ -10,7 +10,6 @@ async function main() {
       { event: 'INSERT', schema: 'public', table: 'schedule_triggers' },
       (payload) => {
         console.log('New trigger row:', payload.new);
-        // e.g., you could forward to an external job queue here
       }
     )
     .subscribe();

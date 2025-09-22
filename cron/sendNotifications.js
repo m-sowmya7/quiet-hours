@@ -13,17 +13,15 @@ async function main() {
   await client.connect();
   const db = client.db();
 
-  // Insert a test block
   await insertTestBlock(db);
 
   const blocks = db.collection('blocks');
 
   const now = new Date();
   const target = new Date(now.getTime() + 10 * 60 * 1000); // exactly 10 minutes ahead
-  const windowStart = new Date(target.getTime() - 30 * 1000); // -30s
-  const windowEnd = new Date(target.getTime() + 30 * 1000); // +30s
+  const windowStart = new Date(target.getTime() - 30 * 1000); 
+  const windowEnd = new Date(target.getTime() + 30 * 1000); 
 
-  // 1) Find candidate unsent blocks inside the window
   const candidates = await blocks
     .find({ notified: false, start_time: { $gte: windowStart, $lte: windowEnd } })
     .toArray();
@@ -36,7 +34,6 @@ async function main() {
     return;
   }
 
-  // 2) Pick earliest per user to avoid multiple emails to same user
   const byUser = new Map();
   for (const c of candidates) {
     const key = c.user_id;
@@ -47,7 +44,6 @@ async function main() {
     }
   }
 
-  // 3) For each chosen block, atomically claim via findOneAndUpdate
   for (const block of Array.from(byUser.values())) {
     console.log('Trying to claim block:', block._id.toString(), block.notified);
     console.log('Type of block._id:', typeof block._id, block._id.constructor.name);
@@ -66,13 +62,12 @@ async function main() {
 
     if (!claim.value) {
       console.log('Failed to claim block', block._id);
-      continue; // someone else claimed it
+      continue;
     }
 
-    // 4) Send email (template as you like)
     try {
       const msg = {
-        to: block.user_email || block.user_id, // adapt: store user email in block or resolve via Supabase
+        to: block.user_email || block.user_id, 
         from: FROM,
         subject: `Reminder: Silent-study starts in 10 minutes`,
         text: `Hi — your silent-study "${block.title || 'block'}" starts at ${new Date(block.start_time).toLocaleString()}.`,
@@ -94,7 +89,6 @@ async function main() {
       console.log('Email sent for', claim.value._id);
     } catch (err) {
       console.error('Send error, rolling back notified flag', err);
-      // roll back notified so next cron may retry
       await blocks.updateOne({ _id: claim.value._id }, { $set: { notified: false } });
     }
 
@@ -107,7 +101,7 @@ async function main() {
 async function insertTestBlock(db) {
   const blocks = db.collection('blocks');
   const now = new Date();
-  const startTime = new Date(now.getTime() + 10 * 60 * 1000); // 10 minutes from now
+  const startTime = new Date(now.getTime() + 10 * 60 * 1000);
   await blocks.insertOne({
     user_id: "75f6922c-98f4-47f3-ba0a-60a82dc936f5",
     user_email: "mustiudaya@gmail.com",

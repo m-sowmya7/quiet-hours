@@ -115,3 +115,9 @@ Troubleshooting
 - "Permission denied writing .next/trace": delete `.next` and ensure no process is locking files.
 - SendGrid: ensure `SENDGRID_API_KEY` starts with `SG.` and `FROM_EMAIL` is set.
 - MongoDB: ensure `MONGODB_URI` points to a running MongoDB instance.
+
+### Supabase users (screenshot)
+
+If you want to verify a test user in Supabase, add a screenshot in `public/supabase-users.png` and it will display below.
+
+![Supabase users](/supabase-users.png)
