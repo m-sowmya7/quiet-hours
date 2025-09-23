@@ -10,9 +10,9 @@ if (!MONGODB_URI) throw new Error('MONGODB_URI not set');
 
 async function main() {
   console.log('Starting notification service at:', new Date().toISOString());
-  console.log('Environment check - MONGODB_URI:', MONGODB_URI ? 'Set' : 'Not set');
-  console.log('Environment check - SENDGRID_API_KEY:', process.env.SENDGRID_API_KEY ? 'Set' : 'Not set');
-  console.log('Environment check - FROM_EMAIL:', FROM);
+  // console.log('Environment check - MONGODB_URI:', MONGODB_URI ? 'Set' : 'Not set');
+  // console.log('Environment check - SENDGRID_API_KEY:', process.env.SENDGRID_API_KEY ? 'Set' : 'Not set');
+  // console.log('Environment check - FROM_EMAIL:', FROM);
 
   const client = new MongoClient(MONGODB_URI, { useUnifiedTopology: true });
   await client.connect();
@@ -35,7 +35,7 @@ async function main() {
     .find({ notified: false, start_time: { $gte: windowStart, $lte: windowEnd } })
     .toArray();
 
-  console.log('Candidates:', candidates.map(c => ({ _id: c._id, notified: c.notified, start_time: c.start_time })));
+  // console.log('Candidates:', candidates.map(c => ({ _id: c._id, notified: c.notified, start_time: c.start_time })));
 
   if (!candidates.length) {
     console.log('No candidates at', new Date().toISOString());

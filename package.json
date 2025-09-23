@@ -6,11 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "cron": "node ./cron/sendNotifications.js",
-    "lint": "eslint"
+    "cron": "node -r dotenv/config ./cron/sendNotifications.js",
+    "cron:supabase": "node -r dotenv/config ./cron/sendNotificationsSupabase.js",
+    "lint": "eslint",
+    "env-check": "node -r dotenv/config -e \"console.log('SUPABASE_URL:', !!process.env.NEXT_PUBLIC_SUPABASE_URL, 'ANON_KEY:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, 'SERVICE_KEY:', !!process.env.SUPABASE_SERVICE_ROLE_KEY)\""
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
+    "@supabase/auth-helpers-nextjs": "^0.10.0",
+    "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.57.4",
     "dotenv": "^17.2.2",
     "mongodb": "^6.20.0",
