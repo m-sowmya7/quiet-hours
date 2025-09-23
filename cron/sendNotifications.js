@@ -9,11 +9,20 @@ const MONGODB_URI = process.env.MONGODB_URI;
 if (!MONGODB_URI) throw new Error('MONGODB_URI not set');
 
 async function main() {
+  console.log('Starting notification service at:', new Date().toISOString());
+  console.log('Environment check - MONGODB_URI:', MONGODB_URI ? 'Set' : 'Not set');
+  console.log('Environment check - SENDGRID_API_KEY:', process.env.SENDGRID_API_KEY ? 'Set' : 'Not set');
+  console.log('Environment check - FROM_EMAIL:', FROM);
+
   const client = new MongoClient(MONGODB_URI, { useUnifiedTopology: true });
   await client.connect();
   const db = client.db();
+  console.log('Successfully connected to MongoDB');
 
-  await insertTestBlock(db);
+  if (process.env.INSERT_TEST_BLOCK === 'true') {
+    console.log("Inserting test block because INSERT_TEST_BLOCK=true");
+    await insertTestBlock(db);
+  }
 
   const blocks = db.collection('blocks');
 
@@ -48,23 +57,25 @@ async function main() {
     console.log('Trying to claim block:', block._id.toString(), block.notified);
     console.log('Type of block._id:', typeof block._id, block._id.constructor.name);
     console.log('Block before claim:', block);
-    // const claim = await blocks.findOneAndUpdate(
-    //   { _id: block._id, notified: false },
-    //   { $set: { notified: true, notified_at: new Date() } },
-    //   { returnDocument: 'after' }
-    // );
+    
+    // Handle ObjectId correctly - if it's a string, convert it; if it's already an ObjectId, use as is
+    const blockId = typeof block._id === 'string' ? new ObjectId(block._id) : block._id;
+    
     const claim = await blocks.findOneAndUpdate(
-      { _id: new ObjectId(block._id), notified: false },
+      { _id: blockId, notified: false },
       { $set: { notified: true, notified_at: new Date() } },
       { returnDocument: 'after' }
     );
 
+    console.log('Claim result:', claim);
 
-    if (!claim.value) {
+    // MongoDB 6.x+ returns the document directly, not inside a 'value' property
+    if (!claim) {
       console.log('Failed to claim block', block._id);
       continue;
     }
-
+    
+    const claimedDoc = claim;
     try {
       const msg = {
         to: block.user_email || block.user_id, 
@@ -74,22 +85,22 @@ async function main() {
         html: `<p>Hi — your silent-study "<strong>${block.title || 'block'}</strong>" starts at <strong>${new Date(block.start_time).toLocaleString()}</strong>.</p>`
       };
 
-      await sgMail.send(msg);
       try {
+        console.log("Attempting to send email to:", msg.to);
         await sgMail.send(msg);
-        console.log("✅ Email sent:", msg);
+        console.log("Email sent:", msg);
       } catch (err) {
-        console.error("❌ SendGrid error:", err.response ? err.response.body : err);
+        console.error("SendGrid error:", err.response ? err.response.body : err);
       }
 
       await blocks.updateOne(
-        { _id: claim.value._id },
+        { _id: claimedDoc._id },
         { $set: { email_sent: true, email_sent_at: new Date() } }
       );
-      console.log('Email sent for', claim.value._id);
+      console.log('Email marked as sent for', claimedDoc._id);
     } catch (err) {
       console.error('Send error, rolling back notified flag', err);
-      await blocks.updateOne({ _id: claim.value._id }, { $set: { notified: false } });
+      await blocks.updateOne({ _id: claimedDoc._id }, { $set: { notified: false } });
     }
 
     await new Promise(r => setTimeout(r, 100));
