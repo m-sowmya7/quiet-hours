@@ -68,9 +68,10 @@ async function main() {
   }
 
   for (const block of Array.from(byUser.values())) {
-    // Only send emails to users who have a valid user_email (authenticated users)
-    if (!block.user_email) {
-      console.log('Skipping block for unauthenticated user:', block.user_id);
+    // Ensure there's an email to send to, using a fallback if necessary
+    const recipientEmail = block.user_email || process.env.ADMIN_EMAIL || process.env.FROM_EMAIL;
+    if (!recipientEmail) {
+      console.log('Skipping block - no email available:', block.user_id);
       continue;
     }
     console.log('Trying to claim block:', block._id.toString(), block.notified);
@@ -95,8 +96,10 @@ async function main() {
 
     const claimedDoc = claim;
     try {
+      // Use the same recipientEmail determined earlier
+      const recipientEmail = block.user_email || process.env.ADMIN_EMAIL || process.env.FROM_EMAIL;
       const msg = {
-        to: block.user_email,
+        to: recipientEmail,
         from: FROM,
         subject: `Reminder: Silent-study starts in 10 minutes`,
         text: `Hi — your silent-study "${block.title || 'block'}" starts at ${new Date(block.start_time).toLocaleString()}.`,
