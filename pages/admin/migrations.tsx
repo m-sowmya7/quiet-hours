@@ -5,7 +5,8 @@ import { useAuth } from '../../contexts/AuthContext';
 export default function RunMigrations() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<{ success?: boolean; message?: string; error?: string } | null>(null);
+  const [result, setResult] = useState<Record<string, unknown> | null>(null);
+  const [results, setResults] = useState<Record<string, unknown>[]>([]);
 
   const runMigrations = async () => {
     setIsLoading(true);
@@ -27,8 +28,8 @@ export default function RunMigrations() {
       } else {
         setResult({ success: true, message: data.message || 'Migrations completed successfully' });
       }
-    } catch (error: any) {
-      setResult({ error: error.message || 'An unexpected error occurred' });
+    } catch (error: unknown) {
+      setResult({ error: error instanceof Error ? error.message : 'An unexpected error occurred' });
     } finally {
       setIsLoading(false);
     }
@@ -76,16 +77,16 @@ export default function RunMigrations() {
           </button>
           
           {result && (
-            <div className={`mt-6 p-4 rounded-md ${result.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
-              {result.success ? (
+            <div className={`mt-6 p-4 rounded-md ${(result as any).success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+              {(result as any).success ? (
                 <div className="text-green-700">
                   <p className="font-medium">✓ Success!</p>
-                  <p className="mt-1 text-sm">{result.message}</p>
+                  <p className="mt-1 text-sm">{String((result as any).message)}</p>
                 </div>
               ) : (
                 <div className="text-red-700">
                   <p className="font-medium">✗ Error</p>
-                  <p className="mt-1 text-sm">{result.error}</p>
+                  <p className="mt-1 text-sm">{String((result as any).error)}</p>
                 </div>
               )}
             </div>

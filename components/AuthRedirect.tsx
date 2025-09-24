@@ -2,7 +2,9 @@ import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 import type { Database } from '../types/database.types';
-import { supabase as supabaseClient } from '../lib/supabaseClient';
+import { useAuth } from '../contexts/AuthContext';
+// Removed unused import
+import { useEffect } from 'react';
 
 export default async function AuthRedirect() {
   try {

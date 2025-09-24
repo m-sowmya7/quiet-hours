@@ -65,8 +65,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     return res.status(200).json({ success: true, message: 'Migrations applied successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Migration error:', error);
-    return res.status(500).json({ error: 'Migration failed', details: error.message });
+    return res.status(500).json({ error: 'Migration failed', details: error instanceof Error ? error.message : 'Unknown error' });
   }
 }

@@ -41,8 +41,8 @@ export default function Login() {
       } else {
         throw new Error("Session could not be established");
       }
-    } catch (err: any) {
-      setError(err.message || "Failed to sign in");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to sign in");
     } finally {
       setLoading(false);
     }
@@ -93,7 +93,7 @@ export default function Login() {
       
       <div className="mt-4 text-center">
         <p className="text-black">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/auth/register" className="text-blue-600 hover:text-blue-800">
             Register
           </Link>

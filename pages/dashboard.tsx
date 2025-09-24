@@ -123,7 +123,7 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="text-center py-12 bg-white rounded-lg shadow">
-                <p className="text-gray-500 mb-4">You don't have any quiet hours blocks yet.</p>
+                <p className="text-gray-500 mb-4">You don&apos;t have any quiet hours blocks yet.</p>
               </div>
             )}
           </div>

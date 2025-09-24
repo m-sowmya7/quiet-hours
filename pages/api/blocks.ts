@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { supabaseAdmin, supabase } from '../../lib/supabaseClient';
+import { supabaseAdmin } from '../../lib/supabaseClient';
 import { getMongoClient } from '../../lib/mongodb';
 import { createClient } from '@supabase/supabase-js';
 
@@ -52,9 +52,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Always trigger the notification script for the new block, passing its ObjectId
     try {
-      const { spawn } = require('child_process');
+      // Import modules at the top level instead
+      const { spawn } = await import('child_process');
+      const path = await import('path');
       const child = spawn('node', [
-        require('path').join(process.cwd(), 'cron', 'sendNotifications.js'),
+        path.join(process.cwd(), 'cron', 'sendNotifications.js'),
         insertResult.insertedId.toString()
       ], {
         detached: true,

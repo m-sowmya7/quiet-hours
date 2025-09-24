@@ -67,9 +67,9 @@ export default function CreateBlock() {
       console.log('CreateBlock - Block created successfully:', data);
       // Redirect to dashboard after successful creation
       router.push('/dashboard');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('CreateBlock - Error details:', err);
-      setError(`Failed to create block: ${err.message || 'Unknown error'}`);
+      setError(`Failed to create block: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   return NextResponse.json({ 
     envCheck: {
       NEXT_PUBLIC_SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,

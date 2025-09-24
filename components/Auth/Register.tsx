@@ -26,8 +26,8 @@ export default function Register() {
       if (error) throw error;
       
       setMessage("Registration successful! Check your email for the confirmation link.");
-    } catch (err: any) {
-      setError(err.message || "An error occurred during registration");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An error occurred during registration");
     } finally {
       setLoading(false);
     }

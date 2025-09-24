@@ -6,7 +6,7 @@ export default function Home() {
       <div className="max-w-2xl text-center">
         <h1 className="text-4xl md:text-5xl font-bold text-black mb-6">Welcome to Quiet Hours</h1>
         <p className="text-xl text-gray-600 mb-8">
-          Schedule your focus time and get notified when it's time to concentrate.
+          Schedule your focus time and get notified when you&apos;re time to concentrate.
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
