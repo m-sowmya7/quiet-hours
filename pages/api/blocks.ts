@@ -28,6 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const doc = {
       user_id: user.id,
+      user_email: user.email,
       title: title ?? 'Silent block',
       start_time: new Date(start_time), // ensure proper ISO
       end_time: end_time ? new Date(end_time) : null,
@@ -49,11 +50,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.warn('Supabase trigger insert failed (non-fatal)', e);
     }
 
-    // Optionally trigger the notification cron job immediately after submission
+    // Always trigger the notification script for the new block, passing its ObjectId
     try {
       const { spawn } = require('child_process');
       const child = spawn('node', [
-        require('path').join(process.cwd(), 'cron', 'sendNotifications.js')
+        require('path').join(process.cwd(), 'cron', 'sendNotifications.js'),
+        insertResult.insertedId.toString()
       ], {
         detached: true,
         stdio: 'ignore'
